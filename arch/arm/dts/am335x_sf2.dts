@@ -18,8 +18,8 @@
 #include <dt-bindings/interrupt-controller/irq.h>
 
 / {
-	model = "TI AM335x EVM-SK";
-	compatible = "ti,am335x-evmsk", "ti,am33xx";
+	model = "Sat-Fi 2";
+	compatible = "ti,am335x-sf2", "ti,am33xx";
 
 	chosen {
 		stdout-path = &uart0;
