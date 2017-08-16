@@ -73,8 +73,10 @@ void do_board_detect(void)
 	enable_i2c0_pin_mux();
 	i2c_init(CONFIG_SYS_OMAP24_I2C_SPEED, CONFIG_SYS_OMAP24_I2C_SLAVE);
 
-	if (ti_i2c_eeprom_am_get(-1, CONFIG_SYS_I2C_EEPROM_ADDR))
-		printf("ti_i2c_eeprom_init failed\n");
+	if (ti_i2c_eeprom_am_get(-1, CONFIG_SYS_I2C_EEPROM_ADDR)) {
+		printf("ti_i2c_eeprom_init failed - assuming sf2 board\n");
+		
+	}
 }
 #endif
 

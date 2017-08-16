@@ -21,18 +21,6 @@ config TARGET_AM335X_EVM
 	  an AM335x processor subsystem.
 
 
-config TARGET_AM335X_SF2
-	bool "Support am335x_sf2"
-	select DM
-	select DM_SERIAL
-	select DM_GPIO
-	select SPL_SYS_MALLOC_SIMPLE if SPL
-	select SPL_SEPARATE_BSS if SPL
-	help
-	  This option specifies support for the AM335x
-	  Sat-Fi 2 board.
-
-
 config TARGET_AM335X_BALTOS
 	bool "Support am335x_baltos"
 	select DM

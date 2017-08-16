@@ -145,7 +145,18 @@ int __maybe_unused ti_i2c_eeprom_am_get(int bus_addr, int dev_addr)
 	int rc;
 	struct ti_am_eeprom am_ep;
 	struct ti_common_eeprom *ep;
-
+	struct ti_am_eeprom sf2_ep = 
+		{
+			TI_EEPROM_HEADER_MAGIC,
+			"A335XSF2",
+			"00C0",
+			"1716BBBK2450",
+			"",
+			{{0x11,0x22,0x33,0x44,0x55}, // Dummy Mac addresses
+			 {0x11,0x22,0x33,0x44,0x55},
+			 {0x11,0x22,0x33,0x44,0x55}}
+		};
+	
 	ep = TI_EEPROM_DATA;
 #ifndef CONFIG_SPL_BUILD
 	if (ep->header == TI_EEPROM_HEADER_MAGIC)
@@ -161,9 +172,11 @@ int __maybe_unused ti_i2c_eeprom_am_get(int bus_addr, int dev_addr)
 
 	rc = ti_i2c_eeprom_get(bus_addr, dev_addr, TI_EEPROM_HEADER_MAGIC,
 			       sizeof(am_ep), (uint8_t *)&am_ep);
-	if (rc)
-		return rc;
+	if (rc) {
+		am_ep = sf2_ep;
+//		return rc;
 
+	}
 	ep->header = am_ep.header;
 	strlcpy(ep->name, am_ep.name, TI_EEPROM_HDR_NAME_LEN + 1);
 	ti_eeprom_string_cleanup(ep->name);

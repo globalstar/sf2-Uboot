@@ -46,7 +46,7 @@ static inline int board_is_evm_sk(void)
 
 static inline int board_is_sf2(void)
 {
-	return board_ti_is("A335X_SF2");
+	return board_ti_is("A335XSF2");
 }
 
 static inline int board_is_idk(void)
