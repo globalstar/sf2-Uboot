@@ -410,7 +410,7 @@ const struct dpll_params *get_dpll_ddr_params(void)
 {
 	if (board_is_evm_sk())
 		return &dpll_ddr_evm_sk;
-	else if (board_is_bone_lt() || board_is_icev2())
+	else if (board_is_bone_lt() || board_is_icev2() || board_is_sf2())
 		return &dpll_ddr_bone_black;
 	else if (board_is_evm_15_or_later())
 		return &dpll_ddr_evm_sk;
@@ -491,7 +491,7 @@ void sdram_init(void)
 	if (board_is_evm_sk())
 		config_ddr(303, &ioregs_evmsk, &ddr3_data,
 			   &ddr3_cmd_ctrl_data, &ddr3_emif_reg_data, 0);
-	else if (board_is_bone_lt())
+	else if (board_is_bone_lt() || board_is_sf2())
 		config_ddr(400, &ioregs_bonelt,
 			   &ddr3_beagleblack_data,
 			   &ddr3_beagleblack_cmd_ctrl_data,
@@ -812,7 +812,7 @@ int board_eth_init(bd_t *bis)
 	}
 
 #ifdef CONFIG_DRIVER_TI_CPSW
-	if (board_is_bone() || board_is_bone_lt() ||
+	if (board_is_bone() || board_is_bone_lt()  || board_is_sf2() ||
 	    board_is_idk()) {
 		writel(MII_MODE_ENABLE, &cdev->miisel);
 		cpsw_slaves[0].phy_if = cpsw_slaves[1].phy_if =
@@ -883,6 +883,8 @@ int board_fit_config_name_match(const char *name)
 	else if (board_is_bone() && !strcmp(name, "am335x-bone"))
 		return 0;
 	else if (board_is_bone_lt() && !strcmp(name, "am335x-boneblack"))
+		return 0;
+	else if (board_is_sf2() && !strcmp(name, "am335x-sf2"))
 		return 0;
 	else if (board_is_evm_sk() && !strcmp(name, "am335x-evmsk"))
 		return 0;
