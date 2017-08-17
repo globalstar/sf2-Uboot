@@ -884,7 +884,7 @@ int board_fit_config_name_match(const char *name)
 		return 0;
 	else if (board_is_bone_lt() && !strcmp(name, "am335x-boneblack"))
 		return 0;
-	else if (board_is_sf2() && !strcmp(name, "am335x-sf2"))
+	else if (board_is_sf2() && !strcmp(name, "am335x-boneblack-satfi2"))
 		return 0;
 	else if (board_is_evm_sk() && !strcmp(name, "am335x-evmsk"))
 		return 0;
