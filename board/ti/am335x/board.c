@@ -806,34 +806,41 @@ int board_eth_init(bd_t *bis)
 #if (defined(CONFIG_DRIVER_TI_CPSW) && !defined(CONFIG_SPL_BUILD)) || \
 	(defined(CONFIG_SPL_ETH_SUPPORT) && defined(CONFIG_SPL_BUILD))
 	if (!getenv("ethaddr")) {
-		puts("<ethaddr> not set. Validating first E-fuse MAC\n");
-		if (is_valid_ethaddr(mac_addr))
-			eth_setenv_enetaddr("ethaddr", mac_addr);
+		if (board_is_sf2()) {
+			puts("<ethaddr> not set.\n");
+		} else {
+			puts("<ethaddr> not set. Validating first E-fuse MAC\n");
+			if (is_valid_ethaddr(mac_addr))
+				eth_setenv_enetaddr("ethaddr", mac_addr);
+		}
 	}
 
 #ifdef CONFIG_DRIVER_TI_CPSW
-	if (board_is_bone() || board_is_bone_lt() ||
-	    board_is_idk()) {
-		writel(MII_MODE_ENABLE, &cdev->miisel);
-		cpsw_slaves[0].phy_if = cpsw_slaves[1].phy_if =
-				PHY_INTERFACE_MODE_MII;
-	} else if (board_is_icev2()) {
-		writel(RMII_MODE_ENABLE | RMII_CHIPCKL_ENABLE, &cdev->miisel);
-		cpsw_slaves[0].phy_if = PHY_INTERFACE_MODE_RMII;
-		cpsw_slaves[1].phy_if = PHY_INTERFACE_MODE_RMII;
-		cpsw_slaves[0].phy_addr = 1;
-		cpsw_slaves[1].phy_addr = 3;
-	} else {
-		writel((RGMII_MODE_ENABLE | RGMII_INT_DELAY), &cdev->miisel);
-		cpsw_slaves[0].phy_if = cpsw_slaves[1].phy_if =
-				PHY_INTERFACE_MODE_RGMII;
-	}
+	if (!board_is_sf2()) {
 
-	rv = cpsw_register(&cpsw_data);
-	if (rv < 0)
-		printf("Error %d registering CPSW switch\n", rv);
-	else
-		n += rv;
+		if (board_is_bone() || board_is_bone_lt() ||
+		    board_is_idk()) {
+			writel(MII_MODE_ENABLE, &cdev->miisel);
+			cpsw_slaves[0].phy_if = cpsw_slaves[1].phy_if =
+				PHY_INTERFACE_MODE_MII;
+		} else if (board_is_icev2()) {
+			writel(RMII_MODE_ENABLE | RMII_CHIPCKL_ENABLE, &cdev->miisel);
+			cpsw_slaves[0].phy_if = PHY_INTERFACE_MODE_RMII;
+			cpsw_slaves[1].phy_if = PHY_INTERFACE_MODE_RMII;
+			cpsw_slaves[0].phy_addr = 1;
+			cpsw_slaves[1].phy_addr = 3;
+		} else {
+			writel((RGMII_MODE_ENABLE | RGMII_INT_DELAY), &cdev->miisel);
+			cpsw_slaves[0].phy_if = cpsw_slaves[1].phy_if =
+				PHY_INTERFACE_MODE_RGMII;
+		}
+
+		rv = cpsw_register(&cpsw_data);
+		if (rv < 0)
+			printf("Error %d registering CPSW switch\n", rv);
+		else
+			n += rv;
+	}
 #endif
 
 	/*
