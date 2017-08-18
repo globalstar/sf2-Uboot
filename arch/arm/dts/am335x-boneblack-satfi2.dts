@@ -1,0 +1,45 @@
+/*
+ * Copyright (C) 2012 Texas Instruments Incorporated - http://www.ti.com/
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ *
+ * Last Modified 09/23/2016   mjp
+ */
+/dts-v1/;
+
+#include "am33xx.dtsi"
+#include "am335x-bone-common-satfi2.dtsi"
+
+/ {
+	model = "TI AM335x Globalstar SatFi2";
+	compatible = "ti,am335x-bone-black", "ti,am335x-bone", "ti,am33xx";
+};
+
+/* Max Core Speed */
+#include "am335x-boneblack-1ghz.dtsi"
+
+&mmc2 {
+    vmmc-supply = <&vbat>;
+};
+
+&rtc {
+	system-power-controller;
+};
+
+/* EMMC in reset */
+&gpio1 {
+	emmc_rst {
+		gpio-hog;
+		gpios = <20 0>;
+		output-high;
+		line-name = "EMMC ResetN";
+	};
+};
+
+/* Only used for TI WiFi module Wl1801
+ * #include "am335x-boneblack-wifi-satfi2.dtsi"
+ */
+#include "gsx2spi.dtsi"
+#include "gps-accel-satfi2.dtsi"
