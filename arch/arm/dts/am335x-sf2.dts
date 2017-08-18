@@ -35,9 +35,6 @@
 	regulator-always-on;
 };
 
-&mmc1 {
-	vmmc-supply = <&vmmcsd_fixed>;
-};
 
 &mmc2 {
 	vmmc-supply = <&vmmcsd_fixed>;

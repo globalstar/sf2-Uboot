@@ -812,7 +812,7 @@ int board_eth_init(bd_t *bis)
 	}
 
 #ifdef CONFIG_DRIVER_TI_CPSW
-	if (board_is_bone() || board_is_bone_lt()  || board_is_sf2() ||
+	if (board_is_bone() || board_is_bone_lt() ||
 	    board_is_idk()) {
 		writel(MII_MODE_ENABLE, &cdev->miisel);
 		cpsw_slaves[0].phy_if = cpsw_slaves[1].phy_if =
@@ -884,7 +884,7 @@ int board_fit_config_name_match(const char *name)
 		return 0;
 	else if (board_is_bone_lt() && !strcmp(name, "am335x-boneblack"))
 		return 0;
-	else if (board_is_sf2() && !strcmp(name, "am335x-boneblack-satfi2"))
+	else if (board_is_sf2() && !strcmp(name, "am335x-sf2"))
 		return 0;
 	else if (board_is_evm_sk() && !strcmp(name, "am335x-evmsk"))
 		return 0;
