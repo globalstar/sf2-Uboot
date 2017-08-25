@@ -186,8 +186,8 @@
 	status = "okay";
 	clock-frequency = <400000>;
 
-	tps: tps@24 {
-		reg = <0x24>;
+	tps: tps@2d {
+		reg = <0x2d>;
 	};
 
 	baseboard_eeprom: baseboard_eeprom@50 {
