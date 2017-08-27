@@ -111,6 +111,9 @@
 	"bootpart=0:2\0" \
 	"bootdir=/boot\0" \
 	"bootfile=zImage\0" \
+	"bootargs=console=ttyO0,115200n8\0" \
+	"serverip=10.168.2.1\0" \
+	"ipaddr=10.168.2.133\0" \
 	"fdtfile=undefined\0" \
 	"console=ttyO0,115200n8\0" \
 	"partitions=" \
