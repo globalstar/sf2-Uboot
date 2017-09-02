@@ -65,6 +65,13 @@ static struct ctrl_dev *cdev = (struct ctrl_dev *)CTRL_DEVICE_BASE;
 #define GPIO1_IRQSTATUSRAW	(AM33XX_GPIO1_BASE + 0x024)
 
 /*
+ * RTC_PMIC register access
+ */
+
+#define RTC_PMIC	(RTC_BASE + 0x098)
+#define PWR_ENABLE_EN	(BIT(16))
+
+/*
  * Read header information from EEPROM into global structure.
  */
 #ifdef CONFIG_TI_I2C_BOARD_DETECT
@@ -369,6 +376,7 @@ void am33xx_spl_board_init(void)
 			puts("tps65217_reg_write failure\n");
 	} else {
 		int sil_rev;
+		u32 reg;
 
 		/*
 		 * The GP EVM, IDK and EVM SK use a TPS65910 PMIC.  For all
@@ -379,6 +387,30 @@ void am33xx_spl_board_init(void)
 		if (i2c_probe(TPS65910_CTRL_I2C_ADDR))
 			return;
 
+		if (board_is_sf2()) {
+
+			/* Handle issue with PMIC not turning board on and off correctly */
+
+			/* Put PMIC_POWER_EN in it's reset state (disabled) */
+			/* When disabled, pmic_power_en signal will always be driven as 1, ON state */
+			/* This is necessary if ALARM2 was used to cut the power to the AM3352 by   */
+			/* setting PMIC_POWER_EN low.  If so we have 1 second from PWRON to put     */
+			/* PMIC_POWER_EN high (or set DEV_ON high in the PMIC DEVCTRL_REG).         */
+			reg = readl(RTC_PMIC) & ~PWR_ENABLE_EN;
+			writel(reg, RTC_PMIC);
+			puts("Clearing PWR_ENABLE_EN on RTC_PMIC register\n");
+
+		
+			#if 0
+			/* Workaround for when PMIC_POWER_EN is low and RTC is not reset */
+			/* Not necessary for cold reset. */
+			if (tps65910_set_dev_on())
+				puts("Failed to set TPS65910 DEV_ON to keep power on\n");
+
+			#endif
+
+		}
+		
 		/*
 		 * Depending on MPU clock and PG we will need a different
 		 * VDD to drive at that speed.
