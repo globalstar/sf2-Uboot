@@ -393,9 +393,11 @@ void am33xx_spl_board_init(void)
 
 			/* Put PMIC_POWER_EN in it's reset state (disabled) */
 			/* When disabled, pmic_power_en signal will always be driven as 1, ON state */
+			
 			/* This is necessary if ALARM2 was used to cut the power to the AM3352 by   */
 			/* setting PMIC_POWER_EN low.  If so we have 1 second from PWRON to put     */
 			/* PMIC_POWER_EN high (or set DEV_ON high in the PMIC DEVCTRL_REG).         */
+
 			reg = readl(RTC_PMIC) & ~PWR_ENABLE_EN;
 			writel(reg, RTC_PMIC);
 			puts("Clearing PWR_ENABLE_EN on RTC_PMIC register\n");
