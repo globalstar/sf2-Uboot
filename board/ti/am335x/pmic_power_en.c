@@ -28,63 +28,6 @@ void rtc_writel(unsigned int reg, u32 val)
 }
 
 
-void rtc_unlock(void)
-{
-	rtc_writel(AM335X_RTC_KICK0_REG, KICK0_VALUE);
-	rtc_writel(AM335X_RTC_KICK1_REG, KICK1_VALUE);
-}
-
-void rtc_lock(void)
-{
-	rtc_writel(AM335X_RTC_KICK0_REG, 0);
-	rtc_writel(AM335X_RTC_KICK1_REG, 0);
-}
-
-void rtc_wait_not_busy(void)
-{
-	int count;
-	u8 status;
-
-	/* BUSY may stay active for 1/32768 second (~30 usec) */
-	for (count = 0; count < 50; count++) {
-		status = rtc_read(AM335X_RTC_STATUS_REG);
-		if (!(status & AM335X_RTC_STATUS_BUSY))
-			break;
-		udelay(1);
-	}
-	/* now we have ~15 usec to read/write various registers */
-}
-
-static int am335x_rtc_set_alarm(u8 year, u8 month, u8 day, u8 hour, u8 min, u8 sec)
-{
-	rtc_wait_not_busy();
-	rtc_write(AM335X_RTC_ALARM_SECONDS_REG, sec);
-	rtc_write(AM335X_RTC_ALARM_MINUTES_REG, min);
-	rtc_write(AM335X_RTC_ALARM_HOURS_REG, hour);
-	rtc_write(AM335X_RTC_ALARM_DAYS_REG, day);
-	rtc_write(AM335X_RTC_ALARM_MONTHS_REG, month);
-	rtc_write(AM335X_RTC_ALARM_YEARS_REG, year);
- 
-	return 0;
-}
-
-static int am335x_rtc_set_time(u8 year, u8 month, u8 day, u8 hour, u8 min, u8 sec, u8 week)
-{
-	rtc_wait_not_busy();
-	rtc_unlock();
-	rtc_write(AM335X_RTC_YEARS_REG, year);
-	rtc_write(AM335X_RTC_MONTHS_REG, month);
-	rtc_write(AM335X_RTC_WEEKS_REG, week);
-	rtc_write(AM335X_RTC_DAYS_REG, day);
-	rtc_write(AM335X_RTC_HOURS_REG, hour);
-	rtc_write(AM335X_RTC_MINUTES_REG, min);
-	rtc_write(AM335X_RTC_SECONDS_REG, sec);
-	rtc_lock();
-
-	return 0;
-}
-
-
 int turn_on_pmic_power_en(void)
 {
   u32 val;
@@ -100,13 +43,6 @@ int turn_on_pmic_power_en(void)
 
   val |= AM335X_RTC_PMIC_PWR_ENABLE_EN;  /* enable the signal to trigger wakeup event */
   rtc_writel(AM335X_RTC_PMIC_REG, val);
-  
-
-#if 0
-  rtc_write(AM335X_RTC_CTRL_REG, 0); /* Make sure RTC is enabled */
-  am335x_rtc_set_alarm(17,9,4,8,44,2);
-  am335x_rtc_set_time( 17,9,4,8,44,0,1);
-#endif
   
   return 0;
 }

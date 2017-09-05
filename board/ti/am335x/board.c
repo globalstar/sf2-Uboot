@@ -384,6 +384,11 @@ void am33xx_spl_board_init(void)
 		if (board_is_sf2()) {
 
 
+			/* set DEV_ON temporarily in case PMIC_PWR_ENABLE is off (low) */
+			puts("Setting DEV_ON in PMIC\n");
+			if (tps65910_set_dev_on())
+				puts("Failed to set TPS65910 DEV_ON\n");
+
 			/* Debugging RTC registers */
 			reg = readl(RTC_STATUS);
 
@@ -446,9 +451,6 @@ void am33xx_spl_board_init(void)
 			
 			/* Handle issue with PMIC not turning board on and off correctly */
 			
-			/* Put PMIC_POWER_EN in it's reset state (disabled) */
-			/* When disabled, pmic_power_en signal will always be driven as 1, ON state */
-
 			/* This is necessary if ALARM2 was used to cut the power to the AM3352 by   */
 			/* setting PMIC_POWER_EN low.  If so we have 1 second from PWRON to put     */
 			/* PMIC_POWER_EN high (or set DEV_ON high in the PMIC DEVCTRL_REG).         */
@@ -458,38 +460,19 @@ void am33xx_spl_board_init(void)
 			reg = readl(RTC_STATUS);
 			if ( (reg >> 7) & 1 ) {
 
-				puts("ALARM2   is set\n");
+				puts("ALARM2 is set, turning on PMIC_POWER_EN (drive as 1)\n");
 
-				/* set DEV_ON temporarily until we can get PMIC_PWR_ENABLE high */
-				puts("Setting DEV_ON in PMIC\n");
-				if (tps65910_set_dev_on())
-					puts("Failed to set TPS65910 DEV_ON\n");
-
-				puts("Turning on PMIC_POWER_EN (driven as 1)\n");
 				turn_on_pmic_power_en();
-
-				mdelay(2500); /* delay for debug */
-				
-				puts("Clearing DEV_ON\n");
-			
-				if (tps65910_clear_dev_on())
-					puts("Failed to clear TPS65910 DEV_ON\n");
-
-				mdelay(20);
 
 				puts("Clearing ALARM2\n");
 				reg |= (1<<7);
 				writel(reg, RTC_STATUS);
 
-
-                                #if 0
-				/* this will cause CCCCCCCCC on booting from mmc ??? */
-				reg = 0;
-				puts("Clearing RTC_STATUS register\n");
-				writel(reg, RTC_STATUS);
-				#endif
-
 			}
+
+			puts("Clearing DEV_ON\n");
+			if (tps65910_clear_dev_on())
+				puts("Failed to clear TPS65910 DEV_ON\n");
 
 		}
 		
