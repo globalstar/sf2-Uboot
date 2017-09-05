@@ -383,11 +383,14 @@ void am33xx_spl_board_init(void)
 
 		if (board_is_sf2()) {
 
-
+                        #if 0 /* debug code */
+			
+                        #if 0
 			/* set DEV_ON temporarily in case PMIC_PWR_ENABLE is off (low) */
 			puts("Setting DEV_ON in PMIC\n");
 			if (tps65910_set_dev_on())
 				puts("Failed to set TPS65910 DEV_ON\n");
+			#endif
 
 			/* Debugging RTC registers */
 			reg = readl(RTC_STATUS);
@@ -448,6 +451,8 @@ void am33xx_spl_board_init(void)
 				if ( (reg >>  0) & 1 ) puts("DEV_OFF        is set\n");
 			}
 			#endif
+
+                        #endif /* end debug code */
 			
 			/* Handle issue with PMIC not turning board on and off correctly */
 			
@@ -470,9 +475,11 @@ void am33xx_spl_board_init(void)
 
 			}
 
+			#if 0
 			puts("Clearing DEV_ON\n");
 			if (tps65910_clear_dev_on())
 				puts("Failed to clear TPS65910 DEV_ON\n");
+			#endif
 
 		}
 		
