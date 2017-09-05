@@ -393,20 +393,19 @@ void am33xx_spl_board_init(void)
 		if (i2c_probe(TPS65910_CTRL_I2C_ADDR))
 			return;
 
+		/* Handle issue with PMIC turning board off. */
 		if (board_is_sf2()) {
 
-			/* Handle issue with PMIC not turning board on and off correctly */
-			
-			/* This is necessary if ALARM2 was used to cut the power to the AM3352 by   */
-			/* setting PMIC_POWER_EN low.  If so we have 1 second from PWRON to put     */
-			/* PMIC_POWER_EN high (or set DEV_ON high in the PMIC DEVCTRL_REG).         */
-
-
-			/* Set PMIC_PWR_ENABLE high if ALARM2 set */
 			val = readl(RTC_STATUS);
 			if ( (val >> 7) & 1 ) {
-
 				puts("ALARM2 is set, turning on PMIC_POWER_EN (drive as 1)\n");
+				
+				/*
+				 * If ALARM2 was used to cut the power by
+				 * setting PMIC_POWER_EN low we have 1 second
+				 * from PWRON to put PMIC_POWER_EN high (or
+				 * set DEV_ON high in the PMIC DEVCTRL_REG).
+				 */
 
 				val = 0;  /* disable PWR_ENABLE_EN */
 				writel(val,RTC_PMIC);
