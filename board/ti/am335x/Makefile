@@ -11,3 +11,4 @@ obj-y	:= mux.o
 endif
 
 obj-y	+= board.o
+obj-y	+= pmic_power_en.o

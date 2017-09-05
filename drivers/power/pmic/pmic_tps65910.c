@@ -55,6 +55,46 @@ int tps65910_set_dev_on(void)
 }
 
 /*
+ * tps65910_clear_dev_on() - Clear the TPS65910 DEV_ON bit of the DEVCTRL_REG
+
+ * @return:		       0 on success, not 0 on failure
+ */
+int tps65910_clear_dev_on(void)
+{
+	int ret;
+	uchar buf;
+
+	ret = i2c_read(TPS65910_CTRL_I2C_ADDR, TPS65910_DEVCTRL_REG, 1,
+		       &buf, 1);
+
+	if (ret)
+		return ret;
+
+	buf &= ~TPS65910_DEVCTRL_REG_DEV_ON;
+
+	return i2c_write(TPS65910_CTRL_I2C_ADDR, TPS65910_DEVCTRL_REG, 1,
+			 &buf, 1);
+}
+
+/*
+ * tps65910_get_devctrl_reg() - Read the TPS65910 DEVCTRL_REG register
+ * @return:		       0 to 0x7F on success, 0x80 on failure
+ */
+int tps65910_get_devctrl_reg(void)
+{
+	int ret;
+	uchar buf;
+
+	ret = i2c_read(TPS65910_CTRL_I2C_ADDR, TPS65910_DEVCTRL_REG, 1,
+		       &buf, 1);
+
+	if (ret)
+		return 0x80;
+
+	return buf;
+}
+
+/*
  * tps65910_voltage_update() - Voltage switching for MPU frequency switching.
  * @module:		       mpu - 0, core - 1
  * @vddx_op_vol_sel:	       vdd voltage to set
