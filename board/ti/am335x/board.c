@@ -39,7 +39,6 @@
 
 #include "../common/board_detect.h"
 #include "board.h"
-#include "pmic_power_en.h"
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -64,6 +63,19 @@ static struct ctrl_dev *cdev = (struct ctrl_dev *)CTRL_DEVICE_BASE;
 
 #define GPIO0_IRQSTATUSRAW	(AM33XX_GPIO0_BASE + 0x024)
 #define GPIO1_IRQSTATUSRAW	(AM33XX_GPIO1_BASE + 0x024)
+
+/*
+ * RTC_PMIC register access
+ */
+
+#define RTC_PMIC	(RTC_BASE + 0x098)
+#define RTC_STATUS	(RTC_BASE + 0x044)
+
+/* RTC_PMIC bit fields: */
+#define RTC_PMIC_PWR_ENABLE_EN	BIT(16)
+#define RTC_PMIC_EXT_WKUP_EN(x)	BIT(x)
+#define RTC_PMIC_EXT_WKUP_POL(x)	BIT(4 + x)
+
 
 /*
  * Read header information from EEPROM into global structure.
@@ -370,7 +382,7 @@ void am33xx_spl_board_init(void)
 			puts("tps65217_reg_write failure\n");
 	} else {
 		int sil_rev;
-		u32 reg;
+		u32 val;
 
 		/*
 		 * The GP EVM, IDK and EVM SK use a TPS65910 PMIC.  For all
@@ -383,77 +395,6 @@ void am33xx_spl_board_init(void)
 
 		if (board_is_sf2()) {
 
-                        #if 0 /* debug code */
-			
-                        #if 0
-			/* set DEV_ON temporarily in case PMIC_PWR_ENABLE is off (low) */
-			puts("Setting DEV_ON in PMIC\n");
-			if (tps65910_set_dev_on())
-				puts("Failed to set TPS65910 DEV_ON\n");
-			#endif
-
-			/* Debugging RTC registers */
-			reg = readl(RTC_STATUS);
-
-			puts("Checking RTC_STATUS Register\n");
-			if (reg == 0) puts ("RTC_STATUS = 0\n");
-			#if 0
-			else {
-				if ( (reg >> 7) & 1 ) puts("ALARM2   is set\n");
-				if ( (reg >> 6) & 1 ) puts("ALARM    is set\n");
-				if ( (reg >> 5) & 1 ) puts("1D_EVENT is set\n");
-				if ( (reg >> 4) & 1 ) puts("1H_EVENT is set\n");
-				if ( (reg >> 3) & 1 ) puts("1M_EVENT is set\n");
-				if ( (reg >> 2) & 1 ) puts("1S_EVENT is set\n");
-				if ( (reg >> 1) & 1 ) puts("RUN      is set\n");
-				if ( (reg >> 0) & 1 ) puts("BUSY     is set\n");
-			}
-			#endif
-
-			reg = readl(RTC_PMIC);
-			puts("Checking RTC_PMIC Register\n");
-			if (reg == 0) puts ("RTC_PMIC = 0\n");
-			#if 0
-			else {
-				if ( (reg >> 18) & 1 ) puts("PWR_ENABLE_SM[1] is set\n" );
-				if ( (reg >> 17) & 1 ) puts("PWR_ENABLE_SM[0] is set\n" );
-				if ( (reg >> 16) & 1 ) puts("PWR_ENABLE_EN is set\n" );
-				if ( (reg >> 15) & 1 ) puts("EXT_WAKEUP_STATUS[3] is set\n" );
-				if ( (reg >> 14) & 1 ) puts("EXT_WAKEUP_STATUS[2] is set\n" );
-				if ( (reg >> 13) & 1 ) puts("EXT_WAKEUP_STATUS[1] is set\n" );
-				if ( (reg >> 12) & 1 ) puts("EXT_WAKEUP_STATUS[0] is set\n" );
-				if ( (reg >> 11) & 1 ) puts("EXT_WAKEUP_DB_EN[3] is set\n" );
-				if ( (reg >> 10) & 1 ) puts("EXT_WAKEUP_DB_EN[2] is set\n" );
-				if ( (reg >>  9) & 1 ) puts("EXT_WAKEUP_DB_EN[1] is set\n" );
-				if ( (reg >>  8) & 1 ) puts("EXT_WAKEUP_DB_EN[0] is set\n" );
-				if ( (reg >>  7) & 1 ) puts("EXT_WAKEUP_POL[3] is set\n" );
-				if ( (reg >>  6) & 1 ) puts("EXT_WAKEUP_POL[2] is set\n" );
-				if ( (reg >>  5) & 1 ) puts("EXT_WAKEUP_POL[1] is set\n" );
-				if ( (reg >>  4) & 1 ) puts("EXT_WAKEUP_POL[0] is set\n" );
-				if ( (reg >>  3) & 1 ) puts("EXT_WAKEUP_EN[3] is set\n" );
-				if ( (reg >>  2) & 1 ) puts("EXT_WAKEUP_EN[2] is set\n" );
-				if ( (reg >>  1) & 1 ) puts("EXT_WAKEUP_EN[1] is set\n" );
-				if ( (reg >>  0) & 1 ) puts("EXT_WAKEUP_EN[0] is set\n" );
-			}
-			#endif
-			
-			reg = tps65910_get_devctrl_reg();
-			puts("Checking TPS65910 DEVCTRL_REG\n");
-			if (reg == 0) puts ("DEVCTRL_REG = 0\n");
-			#if 0
-			else {
-				if ( (reg >>  6) & 1 ) puts("RTC_PWDN       is set\n");
-				if ( (reg >>  5) & 1 ) puts("CK32K_CTRL     is set\n");
-				if ( (reg >>  4) & 1 ) puts("SR_CTL_I2C_SEL is set\n");
-				if ( (reg >>  3) & 1 ) puts("DEV_OFF_RST    is set\n");
-				if ( (reg >>  2) & 1 ) puts("DEV_ON         is set\n");
-				if ( (reg >>  1) & 1 ) puts("DEV_SLP        is set\n");
-				if ( (reg >>  0) & 1 ) puts("DEV_OFF        is set\n");
-			}
-			#endif
-
-                        #endif /* end debug code */
-			
 			/* Handle issue with PMIC not turning board on and off correctly */
 			
 			/* This is necessary if ALARM2 was used to cut the power to the AM3352 by   */
@@ -462,24 +403,29 @@ void am33xx_spl_board_init(void)
 
 
 			/* Set PMIC_PWR_ENABLE high if ALARM2 set */
-			reg = readl(RTC_STATUS);
-			if ( (reg >> 7) & 1 ) {
+			val = readl(RTC_STATUS);
+			if ( (val >> 7) & 1 ) {
 
 				puts("ALARM2 is set, turning on PMIC_POWER_EN (drive as 1)\n");
 
-				turn_on_pmic_power_en();
+				val = 0;  /* disable PWR_ENABLE_EN */
+				writel(val,RTC_PMIC);
+				
+				/* enable external wakeup pin */
+				val = RTC_PMIC_EXT_WKUP_EN(0);
+				/* set active low to force wakeup since signal is tied to GND */
+				val |= RTC_PMIC_EXT_WKUP_POL(0); 
+				writel(val, RTC_PMIC);
+				  
+				/* enable the PMIC_POWER_EN signal  */
+				val |= RTC_PMIC_PWR_ENABLE_EN;  
+				writel(val, RTC_PMIC);
 
 				puts("Clearing ALARM2\n");
-				reg |= (1<<7);
-				writel(reg, RTC_STATUS);
+				val |= (1<<7);
+				writel(val, RTC_STATUS);
 
 			}
-
-			#if 0
-			puts("Clearing DEV_ON\n");
-			if (tps65910_clear_dev_on())
-				puts("Failed to clear TPS65910 DEV_ON\n");
-			#endif
 
 		}
 		
