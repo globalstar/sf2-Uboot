@@ -112,8 +112,6 @@
 	"bootdir=/boot\0" \
 	"bootfile=zImage\0" \
 	"bootargs=console=ttyO0,115200n8\0" \
-	"serverip=10.168.2.1\0" \
-	"ipaddr=10.168.2.133\0" \
 	"fdtfile=undefined\0" \
 	"console=ttyO0,115200n8\0" \
 	"partitions=" \
@@ -146,7 +144,9 @@
 		"bootz ${loadaddr} ${rdaddr} ${fdtaddr}\0" \
 	"findfdt="\
 		"if test $board_name = A335XSF2; then " \
-			"setenv fdtfile am335x-sf2.dtb; fi; " \
+			"setenv fdtfile am335x-sf2.dtb; " \
+	                "setenv bootcmd ${bootcmd_legacy_mmc0}; fi; " \
+	                "boot; fi; "		      \
 		"if test $board_name = A335BONE; then " \
 			"setenv fdtfile am335x-bone.dtb; fi; " \
 		"if test $board_name = A335BNLT; then " \
@@ -347,7 +347,7 @@
 					"-(rootfs)"
 #elif defined(CONFIG_EMMC_BOOT)
 #define CONFIG_ENV_IS_IN_MMC
-#define CONFIG_SYS_MMC_ENV_DEV		1
+#define CONFIG_SYS_MMC_ENV_DEV		0
 #define CONFIG_SYS_MMC_ENV_PART		2
 #define CONFIG_ENV_OFFSET		0x0
 #define CONFIG_ENV_OFFSET_REDUND	(CONFIG_ENV_OFFSET + CONFIG_ENV_SIZE)
