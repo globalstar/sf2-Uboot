@@ -115,7 +115,6 @@ const struct gpio_bank *const omap_gpio_bank = gpio_bank_am33xx;
 int cpu_mmc_init(bd_t *bis)
 {
 	int ret;
-
 	ret = omap_mmc_init(0, 0, 0, -1, -1);
 	if (ret)
 		return ret;

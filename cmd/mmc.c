@@ -135,16 +135,21 @@ static void print_mmcinfo(struct mmc *mmc)
 static struct mmc *init_mmc_device(int dev, bool force_init)
 {
 	struct mmc *mmc;
+	printf("ACDEBUG: init_mmc_device()\n");
 	mmc = find_mmc_device(dev);
 	if (!mmc) {
 		printf("no mmc device at slot %x\n", dev);
 		return NULL;
 	}
 
-	if (force_init)
+	if (force_init) {
+		printf("ACDEBUG: force init\n");
 		mmc->has_init = 0;
-	if (mmc_init(mmc))
+	}
+	if (mmc_init(mmc)) {
+		printf("ACDEBUG: mmc_init failed\n");
 		return NULL;
+	}
 	return mmc;
 }
 static int do_mmcinfo(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
@@ -456,6 +461,7 @@ static int do_mmc_dev(cmd_tbl_t *cmdtp, int flag,
 	}
 
 	mmc = init_mmc_device(dev, true);
+
 	if (!mmc)
 		return CMD_RET_FAILURE;
 

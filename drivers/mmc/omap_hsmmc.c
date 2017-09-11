@@ -45,6 +45,8 @@
 #include <dm.h>
 #include <power/regulator.h>
 
+#define DEBUG
+
 DECLARE_GLOBAL_DATA_PTR;
 
 /* simplify defines to OMAP_HSMMC_USE_GPIO */

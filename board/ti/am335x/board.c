@@ -426,6 +426,12 @@ void am33xx_spl_board_init(void)
 
 			}
 
+			/*
+			 * Override what we have detected since we know if we have
+			 * an AM3352 it supports 1GHz.
+			 */
+			dpll_mpu_opp100.m = MPUPLL_M_1000;
+			
 		}
 		
 		/*
