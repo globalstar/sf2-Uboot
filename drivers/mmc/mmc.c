@@ -24,6 +24,8 @@
 
 #define MAX_ERROR_RATE	20
 
+#define DEBUG
+
 static const unsigned int sd_au_size[] = {
 	0,		SZ_16K / 512,		SZ_32K / 512,
 	SZ_64K / 512,	SZ_128K / 512,		SZ_256K / 512,
