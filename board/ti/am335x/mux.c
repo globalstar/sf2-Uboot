@@ -104,6 +104,21 @@ static struct module_pin_mux mmc1_pin_mux[] = {
 	{-1},
 };
 
+static struct module_pin_mux emmc_mmc1_pin_mux[] = {
+	{OFFSET(gpmc_ad7), (MODE(1) | RXACTIVE | PULLUP_EN)},	/* MMC1_DAT7 */
+	{OFFSET(gpmc_ad6), (MODE(1) | RXACTIVE | PULLUP_EN)},	/* MMC1_DAT6 */
+	{OFFSET(gpmc_ad5), (MODE(1) | RXACTIVE | PULLUP_EN)},	/* MMC1_DAT5 */
+	{OFFSET(gpmc_ad4), (MODE(1) | RXACTIVE | PULLUP_EN)},	/* MMC1_DAT4 */
+	{OFFSET(gpmc_ad3), (MODE(1) | RXACTIVE | PULLUP_EN)},	/* MMC1_DAT3 */
+	{OFFSET(gpmc_ad2), (MODE(1) | RXACTIVE | PULLUP_EN)},	/* MMC1_DAT2 */
+	{OFFSET(gpmc_ad1), (MODE(1) | RXACTIVE | PULLUP_EN)},	/* MMC1_DAT1 */
+	{OFFSET(gpmc_ad0), (MODE(1) | RXACTIVE | PULLUP_EN)},	/* MMC1_DAT0 */
+	{OFFSET(gpmc_csn1), (MODE(2) | RXACTIVE | PULLUP_EN)},	/* MMC1_CLK */
+	{OFFSET(gpmc_csn2), (MODE(2) | RXACTIVE | PULLUP_EN)},	/* MMC1_CMD */
+	{OFFSET(gpmc_a4), (MODE(7) | RXACTIVE | PULLDOWN_EN)},	/* gpio1_20 */
+	{-1},
+};
+
 static struct module_pin_mux i2c0_pin_mux[] = {
 	{OFFSET(i2c0_sda), (MODE(0) | RXACTIVE |
 			PULLUDEN | SLEWCTRL)}, /* I2C_DATA */
@@ -392,8 +407,7 @@ void enable_board_pin_mux(void)
 #endif
 	} else if (board_is_sf2()) {
 		/* Sat-Fi 2 pinmux */
-		configure_module_pin_mux(nand_pin_mux);
-		configure_module_pin_mux(mmc1_pin_mux);
+		configure_module_pin_mux(emmc_mmc1_pin_mux);
 	} else if (board_is_icev2()) {
 		configure_module_pin_mux(mmc0_pin_mux);
 		configure_module_pin_mux(gpio0_18_pin_mux);

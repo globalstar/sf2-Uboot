@@ -132,6 +132,7 @@
 			0x14 (PIN_INPUT_PULLUP | MUX_MODE1) /* gpmc_ad5.mmc1_dat5 */
 			0x18 (PIN_INPUT_PULLUP | MUX_MODE1) /* gpmc_ad6.mmc1_dat6 */
 			0x1c (PIN_INPUT_PULLUP | MUX_MODE1) /* gpmc_ad7.mmc1_dat7 */
+			0x50 (PIN_OUTPUT_PULLDOWN | MUX_MODE7 ) /* gpmc_a4.gpio1_20 */
 		>;
 	};
 };
