@@ -93,10 +93,21 @@
 	"if test ${boot_fit} -eq 1; then "	\
 		"run update_to_fit;"	\
 	"fi;"	\
+	"gpio clear 22; " \
+	"gpio clear 64; " \
+	"gpio clear 67; " \
+	"gpio clear 30; " \
+	"gpio clear 31; " \
+	"gpio clear 20; " \
+	"gpio clear 14; " \
+	"gpio clear 15; " \
+	"gpio set 22; " \
 	"run findfdt; " \
 	"run init_console; " \
 	"run envboot; " \
-	"run distro_bootcmd"
+	"run distro_bootcmd" 
+
+	
 
 #include <config_distro_bootcmd.h>
 
