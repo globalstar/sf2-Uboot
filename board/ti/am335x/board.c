@@ -52,6 +52,7 @@ DECLARE_GLOBAL_DATA_PTR;
 #define GPIO_PHY_RESET		GPIO_TO_PIN(2, 5)
 #define GPIO_ETH0_MODE		GPIO_TO_PIN(0, 11)
 #define GPIO_ETH1_MODE		GPIO_TO_PIN(1, 26)
+#define WIFI_EN		GPIO_TO_PIN(0, 22)
 
 static struct ctrl_dev *cdev = (struct ctrl_dev *)CTRL_DEVICE_BASE;
 
@@ -283,6 +284,7 @@ const struct dpll_params dpll_ddr_bone_black = {
 void am33xx_spl_board_init(void)
 {
 	int mpu_vdd;
+int ret;
 
 	/* Get the frequency */
 	dpll_mpu_opp100.m = am335x_get_efuse_mpu_max_freq(cdev);
@@ -395,7 +397,9 @@ void am33xx_spl_board_init(void)
 
 		/* Handle issue with PMIC turning board off. */
 		if (board_is_sf2()) {
-
+			ret = gpio_request(GPIO_TO_PIN(0, 22), "gpmc_ad8");
+			ret = gpio_direction_output(GPIO_TO_PIN(0, 22), 0);
+			gpio_set_value(GPIO_TO_PIN(0, 22), 1);
 			val = readl(RTC_STATUS);
 			if ( (val >> 7) & 1 ) {
 				puts("ALARM2 is set, turning on PMIC_POWER_EN (drive as 1)\n");
