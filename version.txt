@@ -1,2 +1,2 @@
-uboot-gsv00.01
+uboot-gsv00.02
 
