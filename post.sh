@@ -1,8 +1,7 @@
-
 #!/bin/bash
 
 echo "Untar boot partition"
-tar -xzvf $DIR/boot-partition.tar.gz -C $DIR
+tar -xzvf /tmp/boot-partition.tar.gz -C /tmp/
 MNTBOOT="/mnt/boot"
 if [ ! -d $MNTBOOT ]
 then
@@ -17,7 +16,7 @@ then
 echo "Mounting "$DEVICE" on "$MNTBOOT
 $(/bin/mount $DEVICE $MNTBOOT)
 
-if [ -f "MLO" ] && [ -f "u-boot.img" ]
+if [ -f "/tmp/MLO" ] && [ -f "/tmp/u-boot.img" ]
 then
 echo "Preserving current U-Boot files"
 $(/bin/mv $MNTBOOT/MLO $MNTBOOT/old_MLO)
@@ -34,5 +33,3 @@ fi
 echo "Unmounting "$DEVICE
 $(/bin/umount $DEVICE)
 fi
-
-
