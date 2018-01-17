@@ -1,8 +1,6 @@
 
 #!/bin/bash
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
 echo "Untar boot partition"
 tar -xzvf $DIR/boot-partition.tar.gz -C $DIR
 MNTBOOT="/mnt/boot"
@@ -26,8 +24,8 @@ $(/bin/mv $MNTBOOT/MLO $MNTBOOT/old_MLO)
 $(/bin/mv $MNTBOOT/u-boot.img $MNTBOOT/old_u-boot.img)
 
 echo "Updating U-Boot files from /tmp directory"
-$(/bin/cp $DIR/MLO $MNTBOOT/)
-$(/bin/cp $DIR/u-boot.img $MNTBOOT/)
+$(/bin/cp /tmp/MLO $MNTBOOT/)
+$(/bin/cp /tmp/u-boot.img $MNTBOOT/)
 echo "U-Boot files have been updated - Reboot system"
 else
 echo "ERROR: U-Boot files not in /tmp directory"
