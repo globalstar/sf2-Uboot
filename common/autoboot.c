@@ -219,13 +219,15 @@ static int __abortboot(int bootdelay)
 	printf("Hit any key to stop autoboot: %2d ", bootdelay);
 #endif
 
-	/*
-	 * Check if key already pressed
-	 */
-	if (tstc()) {	/* we got a key press	*/
-		(void) getc();  /* consume input	*/
-		puts("\b\b\b 0");
-		abort = 1;	/* don't auto boot	*/
+	if (bootdelay != -2) {
+		/*
+		 * Check if key already pressed
+		 */
+		if (tstc()) {	/* we got a key press	*/
+			(void) getc();  /* consume input	*/
+			puts("\b\b\b 0");
+			abort = 1;	/* don't auto boot	*/
+		}
 	}
 
 	while ((bootdelay > 0) && (!abort)) {
