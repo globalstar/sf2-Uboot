@@ -69,8 +69,25 @@ static struct ctrl_dev *cdev = (struct ctrl_dev *)CTRL_DEVICE_BASE;
  * RTC_PMIC register access
  */
 
-#define RTC_PMIC	(RTC_BASE + 0x098)
-#define RTC_STATUS	(RTC_BASE + 0x044)
+#define RTC_PMIC            (RTC_BASE + 0x098)
+#define RTC_STATUS          (RTC_BASE + 0x044)
+#define RTC_INTERRUPTS      (RTC_BASE + 0x048)
+
+
+#define RTC_SECONDS	    (RTC_BASE + 0x000)
+#define RTC_MINUTES	    (RTC_BASE + 0x004)
+#define RTC_HOURS	    (RTC_BASE + 0x008)
+#define RTC_DAYS	    (RTC_BASE + 0x00C)
+#define RTC_MONTHS	    (RTC_BASE + 0x010)
+#define RTC_YEARS	    (RTC_BASE + 0x014)
+
+#define RTC_ALARM2_SECONDS  (RTC_BASE + 0x080)
+#define RTC_ALARM2_MINUTES  (RTC_BASE + 0x084)
+#define RTC_ALARM2_HOURS    (RTC_BASE + 0x088)
+#define RTC_ALARM2_DAYS	    (RTC_BASE + 0x08C)
+#define RTC_ALARM2_MONTHS   (RTC_BASE + 0x090)
+#define RTC_ALARM2_YEARS    (RTC_BASE + 0x094)
+
 
 /* RTC_PMIC bit fields: */
 #define RTC_PMIC_PWR_ENABLE_EN	BIT(16)
@@ -284,7 +301,6 @@ const struct dpll_params dpll_ddr_bone_black = {
 void am33xx_spl_board_init(void)
 {
 	int mpu_vdd;
-int ret;
 
 	/* Get the frequency */
 	dpll_mpu_opp100.m = am335x_get_efuse_mpu_max_freq(cdev);
@@ -395,10 +411,10 @@ int ret;
 		if (i2c_probe(TPS65910_CTRL_I2C_ADDR))
 			return;
 
-		/* Handle issue with PMIC turning board off. */
 		if (board_is_sf2()) {
-			ret = gpio_request(GPIO_TO_PIN(0, 22), "gpmc_ad8");
-			ret = gpio_direction_output(GPIO_TO_PIN(0, 22), 0);
+			/* Handle issue with PMIC turning board off. */
+			gpio_request(GPIO_TO_PIN(0, 22), "gpmc_ad8");
+			gpio_direction_output(GPIO_TO_PIN(0, 22), 0);
 			gpio_set_value(GPIO_TO_PIN(0, 22), 1);
 			val = readl(RTC_STATUS);
 			if ( (val >> 7) & 1 ) {
@@ -428,8 +444,84 @@ int ret;
 				val |= (1<<7);
 				writel(val, RTC_STATUS);
 
+				puts("setting bck1_reg to 0x03 to test a hibernate shutdown.\n");
+				tps65910_set_bck1_reg(0x03);
+				
+
 			}
 
+			/* Shut down if we just came out of hibernation with a long key press */
+			if (tps65910_get_bck1_reg() == 0x03) {
+				int count;
+				u8 status;
+				u8 sec1, sec0;
+				
+				puts("power button long-press during hibernate detected.\n");
+				puts("shutting down...\n");
+
+				puts("setting bck1_reg to 0x04 to flag a hibernate shutdown.\n");
+				tps65910_set_bck1_reg(0x04);
+
+				//  wait until seconds is not 59 to simplify alarm2 setting
+				for (count = 0; count < 1500; count++) {
+					val = readl(RTC_SECONDS);
+					sec1 = (val >> 4) & 0x07;
+					sec0 = val & 0x0f;
+					if ((sec1 != 5) | (sec0 != 9))
+						break;
+
+					udelay(1000);
+				}
+				if (count > 0)
+					puts("waited for seconds to turn over.\n");
+				if (count >= 1100)
+					puts("seconds wait failed.\n");
+
+				if (sec0 != 9) {
+					sec0++;
+				}
+				else {
+					sec0 = 0;
+					sec1++;
+				}
+				val = (sec1 << 4) | sec0;
+
+				/* wait until status not busy */
+				/* BUSY may stay active for 1/32768 second (~30 usec) */
+				for (count = 0; count < 50; count++) {
+					status = readl(RTC_STATUS);
+					if (!(status & 1)) // 1 = bit 0 = BUSY
+						break;
+					udelay(1);
+				}
+				/* now we have ~15 usec to read/write various registers */
+
+				/* add a second to time and store ALARM2 time */
+				writel(val, RTC_ALARM2_SECONDS);
+				writel(readl(RTC_MINUTES), RTC_ALARM2_MINUTES);
+				writel(readl(RTC_HOURS), RTC_ALARM2_HOURS);
+				writel(readl(RTC_DAYS), RTC_ALARM2_DAYS);
+				writel(readl(RTC_MONTHS), RTC_ALARM2_MONTHS);
+				writel(readl(RTC_YEARS), RTC_ALARM2_YEARS);
+				
+				/* enable the interrupt for ALARM2 */
+				writel(0x80, RTC_INTERRUPTS);
+
+				/* set PWR_ENABLE_EN bit to allow PMIC_POWER_EN turn off by ALARM2 */
+				val = BIT(16);
+				/* clear EXT_WAKEUP_POL bit to set external_wakeup active high
+				 * because it is tied to GND */
+				val &= ~BIT(4);
+				writel(val,RTC_PMIC);
+				puts("waiting for power off...\n");
+
+				mdelay(2500);
+
+				puts("RTC ALARM2 power off failed, booting system\n");
+				
+
+			}
+			
 			/*
 			 * Override what we have detected since we know if we have
 			 * an AM3352 it supports 1GHz.

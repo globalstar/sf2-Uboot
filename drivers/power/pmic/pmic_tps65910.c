@@ -95,6 +95,38 @@ int tps65910_get_devctrl_reg(void)
 }
 
 /*
+ * tps65910_get_bck1_reg() - Read the TPS65910 BCK1_REG register
+ * @return:		       0 to 0xFF on success, 0 on failure
+ */
+int tps65910_get_bck1_reg(void)
+{
+	int ret;
+	uchar buf;
+
+	ret = i2c_read(TPS65910_CTRL_I2C_ADDR, TPS65910_BCK1_REG, 1,
+		       &buf, 1);
+
+	if (ret)
+		return 0x0;
+
+	return buf;
+}
+
+/*
+ * tps65910_set_bck1_reg() - Set the TPS65910 BCK1_REG register
+ * @buf:	               value to set BCK1_REG
+ * @return:		       0 on success, not 0 on failure
+ */
+int tps65910_set_bck1_reg(unsigned char value)
+{
+	uchar buf = value;
+
+
+	return i2c_write(TPS65910_CTRL_I2C_ADDR, TPS65910_BCK1_REG, 1,
+			 &buf, 1);
+}
+
+/*
  * tps65910_voltage_update() - Voltage switching for MPU frequency switching.
  * @module:		       mpu - 0, core - 1
  * @vddx_op_vol_sel:	       vdd voltage to set
