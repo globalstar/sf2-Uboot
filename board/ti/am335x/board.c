@@ -444,10 +444,6 @@ void am33xx_spl_board_init(void)
 				val |= (1<<7);
 				writel(val, RTC_STATUS);
 
-				puts("setting bck1_reg to 0x03 to test a hibernate shutdown.\n");
-				tps65910_set_bck1_reg(0x03);
-				
-
 			}
 
 			/* Shut down if we just came out of hibernation with a long key press */
@@ -455,6 +451,7 @@ void am33xx_spl_board_init(void)
 				int count;
 				u8 status;
 				u8 sec1, sec0;
+				u8 seconds;
 				
 				puts("power button long-press during hibernate detected.\n");
 				puts("shutting down...\n");
@@ -462,30 +459,36 @@ void am33xx_spl_board_init(void)
 				puts("setting bck1_reg to 0x04 to flag a hibernate shutdown.\n");
 				tps65910_set_bck1_reg(0x04);
 
-				//  wait until seconds is not 59 to simplify alarm2 setting
+				//  wait until seconds is not 58 or 59 to simplify alarm2 setting
 				for (count = 0; count < 1500; count++) {
 					val = readl(RTC_SECONDS);
 					sec1 = (val >> 4) & 0x07;
 					sec0 = val & 0x0f;
-					if ((sec1 != 5) | (sec0 != 9))
+					if ((sec1 == 5) && ((sec0 == 8)||(sec0==9)))
+						puts(".");
+					else
 						break;
 
-					udelay(1000);
+					mdelay(1);
 				}
 				if (count > 0)
 					puts("waited for seconds to turn over.\n");
 				if (count >= 1100)
 					puts("seconds wait failed.\n");
 
-				if (sec0 != 9) {
-					sec0++;
-				}
-				else {
-					sec0 = 0;
-					sec1++;
-				}
-				val = (sec1 << 4) | sec0;
-
+				val = readl(RTC_SECONDS);
+				printf("readl(RTC_SECONDS) = 0x%x\n",val);
+				sec1 = (val >> 4) & 0x07;
+				sec0 = val & 0x0f;
+				
+				/* make ALARM2 time two seconds later */
+				seconds = sec1*10+sec0;
+				seconds = ((seconds + 2) % 60);
+				sec1 = seconds/10;
+				sec0 = seconds - sec1*10;
+				val = sec0 | sec1<<4;
+				printf("seconds to set = %d\n", seconds);
+				
 				/* wait until status not busy */
 				/* BUSY may stay active for 1/32768 second (~30 usec) */
 				for (count = 0; count < 50; count++) {
@@ -507,15 +510,27 @@ void am33xx_spl_board_init(void)
 				/* enable the interrupt for ALARM2 */
 				writel(0x80, RTC_INTERRUPTS);
 
+				val = readl(RTC_PMIC);
+				val &= 0x0f000;
+				val |= BIT(16);
+				writel(val, RTC_PMIC);
+
 				/* set PWR_ENABLE_EN bit to allow PMIC_POWER_EN turn off by ALARM2 */
-				val = BIT(16);
+				val |= BIT(16);
 				/* clear EXT_WAKEUP_POL bit to set external_wakeup active high
 				 * because it is tied to GND */
 				val &= ~BIT(4);
+				/* enable external_wakeup */
+				val |= BIT(0);
+				
 				writel(val,RTC_PMIC);
+
+				val = readl(RTC_SECONDS);
+				printf("readl(RTC_SECONDS) = 0x%x\n",val);
+
 				puts("waiting for power off...\n");
 
-				mdelay(2500);
+				mdelay(3500);
 
 				puts("RTC ALARM2 power off failed, booting system\n");
 				
