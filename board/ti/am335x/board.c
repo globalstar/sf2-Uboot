@@ -460,7 +460,7 @@ void am33xx_spl_board_init(void)
 				tps65910_set_bck1_reg(0x04);
 
 				//  wait until seconds is not 58 or 59 to simplify alarm2 setting
-				for (count = 0; count < 1500; count++) {
+				for (count = 0; count < 21; count++) {
 					val = readl(RTC_SECONDS);
 					sec1 = (val >> 4) & 0x07;
 					sec0 = val & 0x0f;
@@ -469,7 +469,7 @@ void am33xx_spl_board_init(void)
 					else
 						break;
 
-					mdelay(1);
+					mdelay(100); // wait a tenth of a second
 				}
 				if (count > 0)
 					puts("waited for seconds to turn over.\n");
@@ -498,6 +498,8 @@ void am33xx_spl_board_init(void)
 					udelay(1);
 				}
 				/* now we have ~15 usec to read/write various registers */
+
+				printf("setting RTC_ALARM2_SECONDS to 0x%x\n",val);
 
 				/* add a second to time and store ALARM2 time */
 				writel(val, RTC_ALARM2_SECONDS);
@@ -531,6 +533,9 @@ void am33xx_spl_board_init(void)
 				puts("waiting for power off...\n");
 
 				mdelay(3500);
+
+				val = readl(RTC_SECONDS);
+				printf("readl(RTC_SECONDS) = 0x%x\n",val);
 
 				puts("RTC ALARM2 power off failed, booting system\n");
 				
