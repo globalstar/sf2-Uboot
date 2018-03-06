@@ -510,21 +510,19 @@ void am33xx_spl_board_init(void)
 				writel(readl(RTC_YEARS), RTC_ALARM2_YEARS);
 				
 				/* enable the interrupt for ALARM2 */
-				writel(0x80, RTC_INTERRUPTS);
+				writel(BIT(4), RTC_INTERRUPTS);
 
 				val = readl(RTC_PMIC);
-				val &= 0x0f000;
-				val |= BIT(16);
-				writel(val, RTC_PMIC);
-
-				/* set PWR_ENABLE_EN bit to allow PMIC_POWER_EN turn off by ALARM2 */
-				val |= BIT(16);
-				/* clear EXT_WAKEUP_POL bit to set external_wakeup active high
-				 * because it is tied to GND */
-				val &= ~BIT(4);
-				/* enable external_wakeup */
-				val |= BIT(0);
 				
+				/* clear EXT_WAKEUP_STATUS bits */
+				val = BIT(15)|BIT(14)|BIT(13)|BIT(12);
+				writel(val, RTC_PMIC);
+				
+				/* make sure dev on doesn't keep power on */
+				tps65910_clear_dev_on();
+				
+				/* set PWR_ENABLE_EN bit to allow PMIC_POWER_EN turn off by ALARM2 */
+				val = BIT(16);
 				writel(val,RTC_PMIC);
 
 				val = readl(RTC_SECONDS);
