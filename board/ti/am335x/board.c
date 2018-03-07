@@ -456,6 +456,16 @@ void am33xx_spl_board_init(void)
 				puts("power button long-press during hibernate detected.\n");
 				puts("shutting down...\n");
 
+				val = readl(RTC_PMIC);
+				printf("RTC_PMIC = 0x08%x\n",val);
+				val = readl(RTC_INTERRUPTS);
+				printf("RTC_INTERRUPTS = 0x08%x\n",val);
+
+				/* clear ALARM2 in case booted after a shutdown */
+				puts("Clearing ALARM2\n");
+				val |= (1<<7);
+				writel(val, RTC_STATUS);
+
 				puts("setting bck1_reg to 0x04 to flag a hibernate shutdown.\n");
 				tps65910_set_bck1_reg(0x04);
 
@@ -512,11 +522,8 @@ void am33xx_spl_board_init(void)
 				/* enable the interrupt for ALARM2 */
 				writel(BIT(4), RTC_INTERRUPTS);
 
-				val = readl(RTC_PMIC);
-				
-				/* clear EXT_WAKEUP_STATUS bits */
-				val = BIT(15)|BIT(14)|BIT(13)|BIT(12);
-				writel(val, RTC_PMIC);
+				/* clear the external wakeup status */
+				writel(BIT(12),RTC_PMIC);
 				
 				/* make sure dev on doesn't keep power on */
 				tps65910_clear_dev_on();
