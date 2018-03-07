@@ -279,7 +279,7 @@ const struct dpll_params dpll_ddr = {
 const struct dpll_params dpll_ddr_evm_sk = {
 		303, OSC-1, 1, -1, -1, -1, -1};
 const struct dpll_params dpll_ddr_bone_black = {
-		400, OSC-1, 1, -1, -1, -1, -1};
+		390, OSC-1, 1, -1, -1, -1, -1};
 
 void am33xx_spl_board_init(void)
 {
@@ -551,7 +551,7 @@ void sdram_init(void)
 		config_ddr(303, &ioregs_evmsk, &ddr3_data,
 			   &ddr3_cmd_ctrl_data, &ddr3_emif_reg_data, 0);
 	else if (board_is_bone_lt() || board_is_sf2())
-		config_ddr(400, &ioregs_bonelt,
+		config_ddr(390, &ioregs_bonelt,
 			   &ddr3_beagleblack_data,
 			   &ddr3_beagleblack_cmd_ctrl_data,
 			   &ddr3_beagleblack_emif_reg_data, 0);
