@@ -277,9 +277,9 @@ int spl_start_uboot(void)
 const struct dpll_params dpll_ddr = {
 		266, OSC-1, 1, -1, -1, -1, -1};
 const struct dpll_params dpll_ddr_evm_sk = {
-		390, OSC-1, 1, -1, -1, -1, -1};
+		303, OSC-1, 1, -1, -1, -1, -1};
 const struct dpll_params dpll_ddr_bone_black = {
-		400, OSC-1, 1, -1, -1, -1, -1};
+		390, OSC-1, 1, -1, -1, -1, -1};
 
 void am33xx_spl_board_init(void)
 {
@@ -470,7 +470,7 @@ const struct dpll_params *get_dpll_ddr_params(void)
 	if (board_is_evm_sk())
 		return &dpll_ddr_evm_sk;
 	else if (board_is_bone_lt() || board_is_icev2() || board_is_sf2())
-		return &dpll_ddr_evm_sk;
+		return &dpll_ddr_bone_black;
 	else if (board_is_evm_15_or_later())
 		return &dpll_ddr_evm_sk;
 	else
