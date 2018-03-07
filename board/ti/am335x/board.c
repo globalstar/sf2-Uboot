@@ -454,17 +454,20 @@ void am33xx_spl_board_init(void)
 				u8 seconds;
 				
 				puts("power button long-press during hibernate detected.\n");
-				puts("shutting down...\n");
 
 				val = readl(RTC_PMIC);
 				printf("RTC_PMIC = 0x08%x\n",val);
+				if ( (val >> 12) & 1 ) {
+					puts("Clearing EXT_WAKEUP_STATUS[0]\n");
+					val |= (1<<12);
+					writel(val, RTC_PMIC);
+					mdelay(35);
+					val = readl(RTC_PMIC);
+					printf("RTC_PMIC = 0x08%x\n",val);
+				}
+
 				val = readl(RTC_INTERRUPTS);
 				printf("RTC_INTERRUPTS = 0x08%x\n",val);
-
-				/* clear ALARM2 in case booted after a shutdown */
-				puts("Clearing ALARM2\n");
-				val |= (1<<7);
-				writel(val, RTC_STATUS);
 
 				puts("setting bck1_reg to 0x04 to flag a hibernate shutdown.\n");
 				tps65910_set_bck1_reg(0x04);
