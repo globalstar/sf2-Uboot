@@ -459,7 +459,7 @@ void am33xx_spl_board_init(void)
 				printf("RTC_PMIC = 0x08%x\n",val);
 				if ( (val >> 12) & 1 ) {
 					puts("Clearing EXT_WAKEUP_STATUS[0]\n");
-					val |= (1<<12);
+					val = (1<<12);
 					writel(val, RTC_PMIC);
 					mdelay(35);
 					val = readl(RTC_PMIC);
