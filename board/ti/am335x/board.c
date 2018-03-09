@@ -413,9 +413,7 @@ void am33xx_spl_board_init(void)
 
 		if (board_is_sf2()) {
 			/* Handle issue with PMIC turning board off. */
-			gpio_request(GPIO_TO_PIN(0, 22), "gpmc_ad8");
-			gpio_direction_output(GPIO_TO_PIN(0, 22), 0);
-			gpio_set_value(GPIO_TO_PIN(0, 22), 1);
+
 			val = readl(RTC_STATUS);
 			if ( (val >> 7) & 1 ) {
 				puts("ALARM2 is set, turning on PMIC_POWER_EN (drive as 1)\n");
@@ -549,6 +547,10 @@ void am33xx_spl_board_init(void)
 				
 
 			}
+			/* Turn the Marvell chip after hibernator checks */
+			gpio_request(GPIO_TO_PIN(0, 22), "gpmc_ad8");
+			gpio_direction_output(GPIO_TO_PIN(0, 22), 0);
+			gpio_set_value(GPIO_TO_PIN(0, 22), 1);
 			
 			/*
 			 * Override what we have detected since we know if we have
