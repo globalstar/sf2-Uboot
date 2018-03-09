@@ -469,8 +469,8 @@ void am33xx_spl_board_init(void)
 				val = readl(RTC_INTERRUPTS);
 				printf("RTC_INTERRUPTS = 0x08%x\n",val);
 
-				puts("setting bck1_reg to 0x04 to flag a hibernate shutdown.\n");
-				tps65910_set_bck1_reg(0x04);
+				puts("Clearing BCK1_REG.\n");
+				tps65910_set_bck1_reg(0x00);
 
 				//  wait until seconds is not 58 or 59 to simplify alarm2 setting
 				for (count = 0; count < 21; count++) {
