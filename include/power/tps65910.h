@@ -22,6 +22,7 @@ enum {
 	TPS65910_VDD2_REG				= 0x24,
 	TPS65910_VDD2_OP_REG				= 0x25,
 	TPS65910_DEVCTRL_REG				= 0x3F,
+	TPS65910_BCK1_REG				= 0x17,
 };
 
 /* VDD2 & VDD1 control register (VDD2_REG & VDD1_REG) */
@@ -78,4 +79,7 @@ int tps65910_set_dev_on(void);
 int tps65910_clear_dev_on(void);
 int tps65910_get_devctrl_reg(void);
 int tps65910_voltage_update(unsigned int module, unsigned char vddx_op_vol_sel);
+int tps65910_get_bck1_reg(void);
+int tps65910_set_bck1_reg(unsigned char value);
+
 #endif	/* __POWER_TPS65910_H__ */
